@@ -60,11 +60,14 @@ import com.sun.corba.se.impl.orbutil.GetPropertyAction;
 public class Util {
 
     // This can only be set at static initialization time (no sync necessary).
-    private static final javax.rmi.CORBA.UtilDelegate utilDelegate;
+    private static javax.rmi.CORBA.UtilDelegate utilDelegate = null;
     private static final String UtilClassKey = "javax.rmi.CORBA.UtilClass";
+    private static final String defaultUtilImplName =
+"com.sun.corba.se.impl.javax.rmi.CORBA.Util";
 
     static {
-        utilDelegate = (javax.rmi.CORBA.UtilDelegate)createDelegate(UtilClassKey);
+        utilDelegate = (javax.rmi.CORBA.UtilDelegate)
+            createDelegateIfSpecified(UtilClassKey, defaultUtilImplName);
     }
 
     private Util(){}
@@ -335,7 +338,9 @@ Tie#deactivate}
     // are in different packages and the visibility needs to be package for
     // security reasons. If you know a better solution how to share this code
     // then remove it from PortableRemoteObject. Also in Stub.java
-    private static Object createDelegate(String classKey) {
+    private static Object createDelegateIfSpecified(String classKey,
+        String defaultClassName)
+    {
         String className = (String)
             AccessController.doPrivileged(new GetPropertyAction(classKey));
         if (className == null) {
@@ -346,7 +351,7 @@ Tie#deactivate}
         }
 
         if (className == null) {
-            return new com.sun.corba.se.impl.javax.rmi.CORBA.Util();
+            className = defaultClassName;
         }
 
         try {

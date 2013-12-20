@@ -61,11 +61,13 @@ public abstract class Stub extends ObjectImpl
     private transient StubDelegate stubDelegate = null;
     private static Class stubDelegateClass = null;
     private static final String StubClassKey = "javax.rmi.CORBA.StubClass";
+    private static final String defaultStubImplName = "com.sun.corba.se.impl.javax.rmi.CORBA.StubDelegateImpl";
 
     static {
-        Object stubDelegateInstance = createDelegate(StubClassKey);
+        Object stubDelegateInstance = (Object) createDelegateIfSpecified(StubClassKey, defaultStubImplName);
         if (stubDelegateInstance != null)
             stubDelegateClass = stubDelegateInstance.getClass();
+
     }
 
 
@@ -205,7 +207,7 @@ public abstract class Stub extends ObjectImpl
     // are in different packages and the visibility needs to be package for
     // security reasons. If you know a better solution how to share this code
     // then remove it from PortableRemoteObject. Also in Util.java
-    private static Object createDelegate(String classKey) {
+    private static Object createDelegateIfSpecified(String classKey, String defaultClassName) {
         String className = (String)
             AccessController.doPrivileged(new GetPropertyAction(classKey));
         if (className == null) {
@@ -216,7 +218,7 @@ public abstract class Stub extends ObjectImpl
         }
 
         if (className == null) {
-            return new com.sun.corba.se.impl.javax.rmi.CORBA.StubDelegateImpl();
+            className = defaultClassName;
         }
 
         try {
